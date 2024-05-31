@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <button @click="isShow = !isShow">Toggle</button>
+  <div v-if="isShow">{{name}}</div>
+</div>
+<script>
+  const vm = new Vue({
+    el: '#app',
+    data() {
+      return {
+        isShow: false,
+        name: 'gengwenhao',
+      }
+    }
+  })
+</script>
+</body>
+</html>
