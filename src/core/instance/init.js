@@ -1,18 +1,19 @@
 /* @flow */
 
 import config from '../config'
-import { initProxy } from './proxy'
-import { initState } from './state'
-import { initRender } from './render'
-import { initEvents } from './events'
-import { mark, measure } from '../util/perf'
-import { initLifecycle, callHook } from './lifecycle'
-import { initProvide, initInjections } from './inject'
-import { extend, mergeOptions, formatComponentName } from '../util/index'
+import {initProxy} from './proxy'
+import {initState} from './state'
+import {initRender} from './render'
+import {initEvents} from './events'
+import {mark, measure} from '../util/perf'
+import {initLifecycle, callHook} from './lifecycle'
+import {initProvide, initInjections} from './inject'
+import {extend, mergeOptions, formatComponentName} from '../util/index'
 
 let uid = 0
 
-export function initMixin (Vue: Class<Component>) {
+export function initMixin(Vue: Class<Component>) {
+  // _init 方法把 Vue 所有任务执行完成
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
@@ -28,7 +29,9 @@ export function initMixin (Vue: Class<Component>) {
 
     // a flag to avoid this being observed
     vm._isVue = true
-    // merge options
+
+    // Vue 执行 _init 的首要步骤是处理 options
+    // 由于构造器可能传入了一个初始 options 所以还需要进行合并
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -41,6 +44,7 @@ export function initMixin (Vue: Class<Component>) {
         vm
       )
     }
+
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       initProxy(vm)
@@ -49,13 +53,24 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+
+    /**
+     * Vue 初始化的过程中，核心处理就是这几个
+     * 初始化 Lifecycle
+     * 初始化 Events
+     * 初始化 渲染器
+     * 初始化 数据
+     */
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
+    // 生命周期、渲染器是在 beforeCreate 前就执行完成了
     callHook(vm, 'beforeCreate')
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props
+
+    // initState 执行完成后才会调用 created 钩子
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -72,7 +87,7 @@ export function initMixin (Vue: Class<Component>) {
   }
 }
 
-export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+export function initInternalComponent(vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
   const parentVnode = options._parentVnode
@@ -91,7 +106,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
-export function resolveConstructorOptions (Ctor: Class<Component>) {
+export function resolveConstructorOptions(Ctor: Class<Component>) {
   let options = Ctor.options
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
@@ -115,7 +130,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   return options
 }
 
-function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
+function resolveModifiedOptions(Ctor: Class<Component>): ?Object {
   let modified
   const latest = Ctor.options
   const sealed = Ctor.sealedOptions
